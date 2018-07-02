@@ -32,18 +32,30 @@ class TencentjobItem(scrapy.Item):
 	* 在parse方法中使用xpath提取数据
 	* 创建item对象，使用 request.meta 在回调函数间传递参数，用于从多个页面构建item的数据  
 	```python
-	item = TencentjobItem()
-    positionUrl  = "https://hr.tencent.com/" + job.xpath("./td[1]/a/@href").extract()[0]
-    releaseTime = job.xpath("./td[5]/text()").extract()
-    item["releaseTime"] = releaseTime[0]
-    request = scrapy.Request(positionUrl, callback=self.parse_detail)
+	 def parse(self, response):
+     job_list = response.xpath("//tr[@class='even'] | //tr[@class='odd']")
+     for job in job_list:
+         item = TencentjobItem()
+         positionUrl  = "https://hr.tencent.com/" + job.xpath("./td[1]/a/@href").extract()[0]
+         releaseTime = job.xpath("./td[5]/text()").extract()
+         item["releaseTime"] = releaseTime[0]
+         request = scrapy.Request(positionUrl, callback=self.parse_detail)
 
-    # 使用 request.meta 在回调函数间传递参数，用于从多个页面构建item的数据
-    request.meta['item'] = item
-    yield request
+         # 使用 request.meta 在回调函数间传递参数，用于从多个页面构建item的数据
+         request.meta['item'] = item
+         yield request
 	``` 
 	* 传递item给管道：yield item
 	* 获取到下一页url，发送下一个请求
+	```python
+	no_next = response.xpath("//div[@class='pagenav']/a[@class='noactive' and @id='next']/text()")
+        # print("下一页",type(no_next))
+        if not no_next:
+            next_url = "https://hr.tencent.com/" + \
+                       response.xpath("//div[@class='pagenav']/a[@id='next']/@href").extract()[0]
+            # 返回请求给引擎，引擎交给调度器去请求响应
+            yield scrapy.Request(next_url, callback=self.parse)
+	```
 ## 4.编写 Item Pipeline 来存储提取到的Item(即数据)
  - 使用pymysql，打开mysql数据库，创建表tencentjob
  - 定义表字段，设置job_id为主键，且自动递增
