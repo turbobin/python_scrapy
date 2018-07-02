@@ -1,7 +1,7 @@
-##1.创建一个Scrapy项目 
+## 1.创建一个Scrapy项目 
  - scrapy startproject TencentJob 
 
-##2.定义提取的Item
+## 2.定义提取的Item
 ```python  
 class TencentjobItem(scrapy.Item): 
     # define the fields for your item here like:  
@@ -20,7 +20,7 @@ class TencentjobItem(scrapy.Item):
     # 职位要求  
     positionrequest = scrapy.Field()  
 ```
-##3.编写爬取网站的 spider 并提取 Item
+## 3.编写爬取网站的 spider 并提取 Item
  - 创建spider，指定爬虫名tencentjob和爬取的范围  
  	* scrapy genspider tencentjob 'hr.tencent.com'
  	* 执行入口url：
@@ -44,12 +44,12 @@ class TencentjobItem(scrapy.Item):
 	``` 
 	* 传递item给管道：yield item
 	* 获取到下一页url，发送下一个请求
-##4.编写 Item Pipeline 来存储提取到的Item(即数据)
+## 4.编写 Item Pipeline 来存储提取到的Item(即数据)
  - 使用pymysql，打开mysql数据库，创建表tencentjob
  - 定义表字段，设置job_id为主键，且自动递增
  - 按顺序insert表tencentjob
 
-##5.启动spider程序
+## 5.启动spider程序
  - scrapy crawl tencentjob
  - 爬取结果如下：
 ![](https://i.imgur.com/fKjbkLs.png)
